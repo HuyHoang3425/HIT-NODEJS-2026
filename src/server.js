@@ -7,6 +7,7 @@ import router from "./routes/index.js";
 import { error } from "console";
 import errorHandler from "./middlewares/error.middleware.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 dotenv.config();
 
 const app = express();
@@ -22,6 +23,15 @@ app.set("views", path.join(__dirname, "views"));
 // Cấu hình thư mục chứa file tĩnh
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://myapp.com",
+    ],
+  }),
+);
 // Middleware Cho phép server đọc JSON từ body request
 app.use(express.json());
 // Middleware Cho phép server đọc dữ liệu từ form (x-www-form-urlencoded)
