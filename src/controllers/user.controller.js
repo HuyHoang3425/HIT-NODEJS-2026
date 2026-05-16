@@ -3,16 +3,37 @@ import { userModel } from "../models/index.js";
 import bcrypt from "bcrypt";
 import catchAsync from "../utils/catchAsync.js";
 import response from "../utils/response.js";
+import { buildQueryOptions } from "../utils/queryFeatures.js";
 
 // [GET] /api/v1/user
 const getUsers = catchAsync(async (req, res) => {
-  const users = await userModel.find().select("-password");
+  const { page, limit, keyword, sortBy, sortOrder } = req.query;
+  const pageNumber = Math.max(Number(page) || 1, 1);
+  const limitNumber = Math.min(Number(limit) || 10, 20);
+  const skip = (pageNumber - 1) * limitNumber;
 
-  return res
-    .status(StatusCodes.OK)
-    .json(
-      response(StatusCodes.OK, "Lấy danh sách người dùng thành công.", users),
-    );
+  const { filter, sort } = buildQueryOptions(keyword, sortBy, sortOrder);
+
+  const users = await userModel
+    .find(filter)
+    .skip(skip)
+    .limit(limitNumber)
+    .sort({})
+    .select("-password");
+
+  const totalUsers = await userModel.countDocuments();
+
+  return res.status(StatusCodes.OK).json(
+    response(StatusCodes.OK, "Lấy danh sách người dùng thành công.", {
+      data: {
+        users,
+      },
+      totalPage: Math.ceil(totalUsers / limitNumber),
+      currentPage: pageNumber,
+      totalUsers,
+      limitNumber,
+    }),
+  );
 });
 
 // [GET] /api/v1/user/:userId

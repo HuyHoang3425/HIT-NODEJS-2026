@@ -1,4 +1,7 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
+
+import slug from "mongoose-slug-updater";
+mongoose.plugin(slug);
 
 const userModel = new Schema({
   username: {
@@ -10,6 +13,10 @@ const userModel = new Schema({
     require: true,
   },
   avatar: String,
+  slug: {
+    type: String,
+    slug: "username",
+  },
   status: {
     type: String,
     enum: ["active", "inactive"],
